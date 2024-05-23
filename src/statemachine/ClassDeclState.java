@@ -156,7 +156,8 @@ public class ClassDeclState extends TranspilerState<InternalState>
 	{
 		if(!className.isPresent())
 			return Optional.empty();
-		return Optional.of(new JavaClass(isStatic, accessModifier, className.get(), superClassName, implementedInterfaces, functions, attributes));
+		return Optional.of(new JavaClass(isStatic, accessModifier, className.get(),
+				superClassName, implementedInterfaces, functions, attributes));
 	}
 	
 

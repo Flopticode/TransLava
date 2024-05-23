@@ -28,13 +28,10 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 	
 	@SuppressWarnings("unchecked")
 	protected void addActive(InternalState... states)
-	{
+	{	
 		for(InternalState is : states)
 		{
-			if(!activeStates.contains(is))
-			{
-				activeStates.add(is);
-			}
+			activeStates.add(is);
 		}
 	}
 	
@@ -102,18 +99,18 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 	public abstract void onFinish(InternalState state);
 	
 	@SuppressWarnings("unchecked")
-	private void resetStates()
+	protected void resetStates()
 	{
 		if(internalStates.length > 0)
 		{
 			activeStates.clear();
-			this.addActive(defaultActive);
 			
 			TranspilerState<InternalState>[] transpilerStates = (TranspilerState<InternalState>[]) transpilerStateSupplier.get();
 			
-			
 			for(int i = 0; i < internalStates.length; i++)
 				states.put(internalStates[i], transpilerStates[i]);
+			
+			this.addActive(defaultActive);
 		}
 	}
 	protected abstract void reset();

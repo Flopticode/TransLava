@@ -11,8 +11,6 @@ public class ImportDeclState extends TranspilerState<InternalState>
 	{
 		Import(false),
 		PackageSig(false),
-		Dot(false),
-		Classname(false),
 		Semicolon(true);
 		
 		private boolean isFinal;
@@ -34,15 +32,12 @@ public class ImportDeclState extends TranspilerState<InternalState>
 			return new TranspilerState[] {
 				new PrimitiveState("import"),
 				new PackageSigState(),
-				new PrimitiveState("."),
-				new PrimitiveState(),
 				new PrimitiveState(";")
 			};
 		}
 	}
 	
 	private Optional<String> packageSignature = Optional.empty();
-	private Optional<String> className = Optional.empty();
 	
 	public ImportDeclState()
 	{
@@ -60,18 +55,9 @@ public class ImportDeclState extends TranspilerState<InternalState>
 			
 		case PackageSig:
 			packageSignature = ((PackageSigState)getTranspilerState(InternalState.PackageSig)).getPackageSignature();
-			this.addActive(InternalState.Dot);
-			break;
-			
-		case Dot:
-			this.addActive(InternalState.Classname);
-			break;
-			
-		case Classname:
 			this.addActive(InternalState.Semicolon);
-			className = ((PrimitiveState)getTranspilerState(InternalState.Classname)).getInput();
 			break;
-		
+			
 		case Semicolon:
 			break;
 		}
@@ -85,9 +71,9 @@ public class ImportDeclState extends TranspilerState<InternalState>
 	
 	public Optional<JavaImport> getImport()
 	{
-		if(packageSignature.isPresent() && className.isPresent())
+		if(packageSignature.isPresent())
 		{
-			return Optional.of(new JavaImport(packageSignature.get(), className.get()));
+			return Optional.of(new JavaImport(packageSignature.get()));
 		}
 		return Optional.empty();
 	}

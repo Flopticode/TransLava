@@ -50,6 +50,7 @@ public class ImportListState extends TranspilerState<InternalState>
 			Optional<JavaImport> oImport = ((ImportDeclState)getTranspilerState(InternalState.ImportDecl)).getImport();
 			if(oImport.isPresent())
 				imports.add(oImport.get());
+			getTranspilerState(InternalState.ImportDecl).resetStates();
 			this.addActive(InternalState.ImportDecl);
 			break;
 		}

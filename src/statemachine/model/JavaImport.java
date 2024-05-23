@@ -1,22 +1,22 @@
 package statemachine.model;
 
+import java.util.regex.Pattern;
+
 public class JavaImport
 {
-	private String packageSignature;
-	private String className;
+	private String[] packageSignature;
 	
-	public JavaImport(String packageSignature, String className)
+	public JavaImport(String packageSignature)
 	{
-		this.packageSignature = packageSignature;
-		this.className = className;
+		this.packageSignature = packageSignature.split(Pattern.quote("."));
 	}
 	
-	public String getPackageSignature()
+	public String[] getPackageSignature()
 	{
 		return packageSignature;
 	}
 	public String getClassName()
 	{
-		return className;
+		return packageSignature[packageSignature.length - 1];
 	}
 }

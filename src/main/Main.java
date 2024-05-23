@@ -8,12 +8,13 @@ import java.util.Optional;
 
 import statemachine.JavaFileState;
 import statemachine.model.JavaClass;
+import statemachine.model.JavaImport;
 
-public class Main
+public abstract class Main
 {
 	public static void main(String[] args) throws IOException
 	{
-		BufferedReader br = new BufferedReader(new FileReader(new File("./tests/MinimalCode.java")));
+		BufferedReader br = new BufferedReader(new FileReader(new File("./tests/ImportTest.java")));
 		String content = "";
 		while(br.ready())
 			content += br.readLine() + "\n";
@@ -27,10 +28,25 @@ public class Main
 			state.evaluate(token);
 		}
 		
+		System.out.println("Our imports are: ");
+		for(JavaImport javaImport : state.getImports())
+		{
+			String[] sig = javaImport.getPackageSignature();
+			for(String part : sig)
+			{
+				System.out.print(part);
+				if(!part.equals(sig[sig.length - 1]))
+					System.out.print(".");
+			}
+			System.out.println();
+		}
+		
 		Optional<JavaClass> oJavaClass = state.getJavaClass();
 		if(oJavaClass.isPresent())
 		{
-			System.out.println("We have a java class named \"" + oJavaClass.get().getClassName() + "\"!");
+			JavaClass javaClass = oJavaClass.get();
+			
+			System.out.println("We have a java class named \"" + javaClass.getClassName() + "\"!");
 		}
 		else
 		{

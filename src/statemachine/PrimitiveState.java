@@ -48,6 +48,12 @@ public class PrimitiveState extends TranspilerState<InternalState>
 		super(new InternalState[] {InternalState.DEFAULT}, InternalState::createTranspilerStates);
 		this.expectedInput = expectedInput;
 	}
+	
+	@Override
+	protected void resetStates()
+	{
+		receivedInput = Optional.empty();
+	}
 
 	@Override
 	public boolean canConsume(String token)

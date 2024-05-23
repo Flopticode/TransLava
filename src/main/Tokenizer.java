@@ -23,6 +23,7 @@ public class Tokenizer
 		Vector<String> tokens = new Vector<>();
 		String curToken = "";
 		
+		boolean prevNotAlphanumerical = false;
 		for(int i = 0; i < str.length(); i++)
 		{
 			char c = str.charAt(i);
@@ -30,9 +31,16 @@ public class Tokenizer
 			if(!(isLetter(c) || isNumber(c)))
 			{
 				curToken = endToken(tokens, curToken);
+				prevNotAlphanumerical = true;
+			}
+			else if(prevNotAlphanumerical)
+			{
+				curToken = endToken(tokens, curToken);
+				prevNotAlphanumerical = false;
 			}
 			
-			curToken += str.charAt(i);
+			curToken += c;
+			
 		}
 		if(!curToken.isEmpty())
 			tokens.add(curToken);

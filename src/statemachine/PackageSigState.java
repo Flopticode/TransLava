@@ -51,14 +51,17 @@ public class PackageSigState extends TranspilerState<InternalState>
 			if(oInput.isPresent())
 				if(signature.isPresent())
 					signature = Optional.of(signature.get() + oInput.get());
+			
+			getTranspilerState(InternalState.Dot).resetStates();
 			this.addActive(InternalState.Dot);
 			break;
-		case Dot:
 			
+		case Dot:
 			Optional<String> oInput2 = ((PrimitiveState)getTranspilerState(InternalState.Dot)).getInput();
 			if(oInput2.isPresent())
 				if(signature.isPresent())
 					signature = Optional.of(signature.get() + oInput2.get());
+			getTranspilerState(InternalState.Name).resetStates();
 			this.addActive(InternalState.Name);
 			break;
 		}
