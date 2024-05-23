@@ -60,10 +60,10 @@ public class ClassDeclState extends TranspilerState<InternalState>
 				new PrimitiveState("{"),
 				new PrimitiveState("static"),
 				new InstructionBodyState(),
-				new AttributeDeclState(),
-				new FunctionDeclState(),
-				new ClassDeclState(),
-				new ConstructorDeclState(),
+				new PrimitiveState("asdasdasd"),//new AttributeDeclState(),
+				new PrimitiveState("asdasdasd"),//new FunctionDeclState(),
+				new PrimitiveState("asdasdasd"),//new ClassDeclState(),
+				new PrimitiveState("asdasdasd"),//new ConstructorDeclState(),
 				new PrimitiveState("}")
 			};
 		}
@@ -79,8 +79,7 @@ public class ClassDeclState extends TranspilerState<InternalState>
 	
 	public ClassDeclState()
 	{
-		super(
-				new InternalState[] {InternalState.AccessModifier},
+		super(  new InternalState[] {InternalState.AccessModifier, InternalState.HeadStatic, InternalState.Class},
 				InternalState::createTranspilerStates);
 	}
 	

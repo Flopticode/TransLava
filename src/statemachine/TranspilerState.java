@@ -7,15 +7,15 @@ import java.util.function.Supplier;
 
 public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 {	
-	private Enum<InternalState> internalStateEnum;
+	private InternalState[] internalStates;
 	private Map<InternalState, TranspilerState<? extends Enum<InternalState>>> states = new HashMap<>();
 	private Vector<InternalState> activeStates = new Vector<>();
 	private Supplier<TranspilerState<? extends Enum<InternalState>>[]> transpilerStateSupplier;
 	private InternalState[] defaultActive;
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TranspilerState(InternalState[] active, Supplier<TranspilerState<? extends Enum<InternalState>>[]> transpilerStateSupplier)
 	{
+		this.internalStates = active[0].getDeclaringClass().getEnumConstants();
 		this.transpilerStateSupplier = transpilerStateSupplier;
 		this.defaultActive = active;
 		resetStates();
@@ -41,19 +41,25 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 	public void evaluate(String token)
 	{
 		Vector<InternalState> remove = new Vector<>();
-		for(InternalState active : activeStates)
+		
+		int numActiveBefore = activeStates.size();
+		for(int i = 0; i < numActiveBefore; i++)
 		{
+			InternalState active = activeStates.get(i);
+			
 			TranspilerState<? extends Enum<?>> transpilerState = getTranspilerState(active);
 			
 			if(transpilerState.canConsume(token))
 			{
 				transpilerState.evaluate(token);
+				
+				if(transpilerState.isAccepting())
+				{
+					onFinish(active);
+				}
 			}
 			else
 			{
-				onFinish(active);
-				resetStates();
-				reset();
 				remove.add(active);
 			}
 		}
@@ -80,31 +86,35 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 	}
 	
 	/**
-	 * A state is accepting if any final state is accepting and there are no active states, meaning the parsing of the state is done.
+	 * A state is accepting if any final state is accepting
 	 */
 	public boolean isAccepting()
 	{
-		for(InternalState s : internalStateEnum.getDeclaringClass().getEnumConstants())
+		for(InternalState s : internalStates)
 		{
 			if(((FinalStates)s).isFinal() && getTranspilerState(s).isAccepting())
 			{
-				return activeStates.isEmpty();
+				return true;
 			}
 		}
 		return false;
 	}
 	public abstract void onFinish(InternalState state);
+	
+	@SuppressWarnings("unchecked")
 	private void resetStates()
 	{
-		activeStates.clear();
-		
-		this.addActive(defaultActive);
-		
-		TranspilerState[] transpilerStates = transpilerStateSupplier.get();
-		
-		InternalState[] internalStates = internalStateEnum.getDeclaringClass().getEnumConstants();
-		for(int i = 0; i < internalStates.length; i++)
-			states.put(internalStates[i], transpilerStates[i]);
+		if(internalStates.length > 0)
+		{
+			activeStates.clear();
+			this.addActive(defaultActive);
+			
+			TranspilerState<InternalState>[] transpilerStates = (TranspilerState<InternalState>[]) transpilerStateSupplier.get();
+			
+			
+			for(int i = 0; i < internalStates.length; i++)
+				states.put(internalStates[i], transpilerStates[i]);
+		}
 	}
 	protected abstract void reset();
 }

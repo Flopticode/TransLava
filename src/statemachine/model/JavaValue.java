@@ -1,6 +1,6 @@
 package statemachine.model;
 
-public class JavaInstruction
+public class JavaValue
 {
 
 }

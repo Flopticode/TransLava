@@ -6,9 +6,30 @@ import statemachine.PrimitiveState.InternalState;
 
 public class PrimitiveState extends TranspilerState<InternalState>
 {
-	protected static enum InternalState
+	protected static enum InternalState implements FinalStates
 	{
+		DEFAULT(true);
 		
+		private boolean isFinal;
+		
+		InternalState(boolean isFinal)
+		{
+			this.isFinal = isFinal;
+		}
+
+		@Override
+		public boolean isFinal()
+		{
+			return isFinal;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public static TranspilerState<InternalState>[] createTranspilerStates()
+		{
+			return new TranspilerState[] {
+				null
+			};
+		}
 	}
 	
 	private Optional<String> expectedInput = Optional.empty();
@@ -24,13 +45,16 @@ public class PrimitiveState extends TranspilerState<InternalState>
 	}
 	public PrimitiveState(Optional<String> expectedInput)
 	{
-		super(new InternalState[] {}, null);
+		super(new InternalState[] {InternalState.DEFAULT}, InternalState::createTranspilerStates);
 		this.expectedInput = expectedInput;
 	}
 
 	@Override
 	public boolean canConsume(String token)
 	{
+		if(receivedInput.isPresent())
+			return false;
+		
 		if(expectedInput.isPresent())
 			return token.equals(expectedInput.get());
 		return true;
@@ -52,13 +76,20 @@ public class PrimitiveState extends TranspilerState<InternalState>
 	}
 	
 	@Override
-	public void updateState()
+	public void onFinish(InternalState state)
 	{
 		
 	}
-
+	
+	@Override
+	protected void reset()
+	{
+		expectedInput = Optional.empty();
+		receivedInput = Optional.empty();
+	}
+	
 	public Optional<String> getInput()
 	{
-		return expectedInput;
+		return receivedInput;
 	}
 }

@@ -40,7 +40,7 @@ public class JavaFileState extends TranspilerState<InternalState>
 	}
 	
 	private Optional<String> packageName = Optional.empty();
-	private LinkedList<JavaImport> imports;
+	private LinkedList<JavaImport> imports = new LinkedList<>();
 	private Optional<JavaClass> javaClass = Optional.empty();
 	
 	public JavaFileState()
@@ -48,13 +48,14 @@ public class JavaFileState extends TranspilerState<InternalState>
 		super(new InternalState[]{InternalState.PackageDecl}, InternalState::createTranspilerStates);
 	}
 	
+	@Override
 	public void onFinish(InternalState finished)
 	{
 		switch(finished)
 		{
 		case PackageDecl:
 			packageName = ((PackageDeclState)getTranspilerState(InternalState.PackageDecl)).getPackageName();
-			this.addActive(InternalState.ImportList);
+			this.addActive(InternalState.ImportList, InternalState.ClassDecl);
 			break;
 			
 		case ImportList:
