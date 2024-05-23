@@ -35,6 +35,11 @@ public class Main
 		else
 		{
 			System.err.println("Nooo, where is my JavaClass :c");
+			System.err.println("Tokens:");
+			for(String token : tokens)
+			{
+				System.err.println(token);
+			}
 		}
 	}
 }

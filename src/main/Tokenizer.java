@@ -3,24 +3,21 @@ package main;
 import java.util.Vector;
 
 public class Tokenizer
-{	
+{
+	private static final char[] whitespaces = {'\r', '\n', ' ', '\t'};
+	
 	public static Vector<String> tokenize(String str)
 	{
-		if(str.contains(" "))
+		for(char whitespace : whitespaces)
 		{
-			String[] parts = str.split(" ");
-			Vector<String> tokens = new Vector<>();
-			for(String part : parts)
-				tokens.addAll(tokenize(part));
-			return tokens;
-		}
-		if(str.contains("\n"))
-		{
-			String[] parts = str.split("\n");
-			Vector<String> tokens = new Vector<>();
-			for(String part : parts)
-				tokens.addAll(tokenize(part));
-			return tokens;
+			if(str.contains("" + whitespace))
+			{
+				String[] parts = str.split("" + whitespace);
+				Vector<String> tokens = new Vector<>();
+				for(String part : parts)
+					tokens.addAll(tokenize(part));
+				return tokens;
+			}
 		}
 		
 		Vector<String> tokens = new Vector<>();
@@ -55,9 +52,5 @@ public class Tokenizer
 	private static boolean isNumber(char c)
 	{
 		return c >= '0' && c <= '9';
-	}
-	private static boolean isWhitespace(char c)
-	{
-		return c == '\n' || c == '\r' || c == ' ';
 	}
 }
