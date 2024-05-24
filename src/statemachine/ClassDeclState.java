@@ -2,7 +2,10 @@ package statemachine;
 
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.ClassDeclState.InternalState;
 import statemachine.model.AccessModifier;
 import statemachine.model.JavaAttribute;
@@ -51,11 +54,11 @@ public class ClassDeclState extends TranspilerState<InternalState>
 				new AccessModifierState(),
 				new PrimitiveState("static"),
 				new PrimitiveState("class"),
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState("extends"),
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState("implements"),
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState(","),
 				new PrimitiveState("{"),
 				new PrimitiveState("static"),
@@ -84,72 +87,63 @@ public class ClassDeclState extends TranspilerState<InternalState>
 	}
 	
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
 		case AccessModifier:
 			accessModifier = ((AccessModifierState)getTranspilerState(InternalState.AccessModifier)).getAccessModifier();
-			this.addActive(InternalState.HeadStatic, InternalState.Class);
-			break;
+			return Vec.of(InternalState.HeadStatic, InternalState.Class);
 			
 		case HeadStatic:
 			isStatic = true;
-			this.addActive(InternalState.Class);
-			break;
+			return Vec.of(InternalState.Class);
 			
 		case Class:
-			this.addActive(InternalState.Classname);
-			break;
+			return Vec.of(InternalState.Classname);
 			
 		case Classname:
 			className = ((PrimitiveState)getTranspilerState(InternalState.Classname)).getInput();
-			this.addActive(InternalState.Extends, InternalState.Implements, InternalState.OpenCurlyBracket);
-			break;
+			return Vec.of(InternalState.Extends, InternalState.Implements, InternalState.OpenCurlyBracket);
 			
 		case Extends:
-			this.addActive(InternalState.SuperclassName);
-			break;
+			return Vec.of(InternalState.SuperclassName);
 			
 		case SuperclassName:
 			superClassName = ((PrimitiveState)getTranspilerState(InternalState.SuperclassName)).getInput();
-			this.addActive(InternalState.Implements, InternalState.OpenCurlyBracket);
-			break;
+			return Vec.of(InternalState.Implements, InternalState.OpenCurlyBracket);
 			
 		case Implements:
-			this.addActive(InternalState.IFaceName);
-			break;
+			return Vec.of(InternalState.IFaceName);
 			
 		case IFaceName:
 			var input = ((PrimitiveState)getTranspilerState(InternalState.SuperclassName)).getInput();
 			if(input.isPresent())
 				implementedInterfaces.add(input.get());
-			this.addActive(InternalState.Comma);
-			break;
+			return Vec.of(InternalState.Comma);
 			
 		case Comma:
-			this.addActive(InternalState.IFaceName);
-			break;
+			return Vec.of(InternalState.IFaceName);
 			
 		case OpenCurlyBracket:
-			this.addActive(InternalState.ClosedCurlyBracket,
+			return Vec.of(InternalState.ClosedCurlyBracket,
 					InternalState.BodyStatic,
 					InternalState.AttributeDecl,
 					InternalState.FunctionDecl,
 					InternalState.ClassDecl,
 					InternalState.ConstructorDecl);
-			break;
 			
 		case ClosedCurlyBracket:
-			break;
+			return Vec.empty();
 			
 		case BodyStatic:
-			this.addActive(InternalState.InstructionBody);
-			break;
+			return Vec.of(InternalState.InstructionBody);
 		
 		case InstructionBody:
 			
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 	
 	public Optional<JavaClass> getJavaClass()

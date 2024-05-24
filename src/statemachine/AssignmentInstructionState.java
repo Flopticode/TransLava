@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.AssignmentInstructionState.InternalState;
 import statemachine.model.JavaAssignmentInstruction;
 import statemachine.model.JavaValue;
@@ -32,7 +35,7 @@ public class AssignmentInstructionState extends TranspilerState<InternalState>
 		public static TranspilerState<InternalState>[] createTranspilerStates()
 		{
 			return new TranspilerState[] {
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState("="),
 				new ValueState(),
 				new PrimitiveState(";")
@@ -49,27 +52,26 @@ public class AssignmentInstructionState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
 		case Var:
 			variableName = ((PrimitiveState)getTranspilerState(InternalState.Var)).getInput();
-			this.addActive(InternalState.Equals);
-			break;
+			return Vec.of(InternalState.Equals);
 		
 		case Equals:
-			this.addActive(InternalState.Value);
-			break;
+			return Vec.of(InternalState.Value);
 		
 		case Value:
 			value = ((ValueState)getTranspilerState(InternalState.Value)).getValue();
-			this.addActive(InternalState.Semicolon);
-			break;
+			return Vec.of(InternalState.Semicolon);
 			
 		case Semicolon:
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

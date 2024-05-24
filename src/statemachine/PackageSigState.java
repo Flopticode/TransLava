@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.PackageSigState.InternalState;
 
 public class PackageSigState extends TranspilerState<InternalState>
@@ -28,7 +31,7 @@ public class PackageSigState extends TranspilerState<InternalState>
 		public static TranspilerState<InternalState>[] createTranspilerStates()
 		{
 			return new TranspilerState[] {
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState(".")
 			};
 		}
@@ -42,7 +45,7 @@ public class PackageSigState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -52,19 +55,18 @@ public class PackageSigState extends TranspilerState<InternalState>
 				if(signature.isPresent())
 					signature = Optional.of(signature.get() + oInput.get());
 			
-			getTranspilerState(InternalState.Dot).resetStates();
-			this.addActive(InternalState.Dot);
-			break;
+			return Vec.of(InternalState.Dot);
 			
 		case Dot:
 			Optional<String> oInput2 = ((PrimitiveState)getTranspilerState(InternalState.Dot)).getInput();
 			if(oInput2.isPresent())
 				if(signature.isPresent())
 					signature = Optional.of(signature.get() + oInput2.get());
-			getTranspilerState(InternalState.Name).resetStates();
-			this.addActive(InternalState.Name);
-			break;
+			
+			return Vec.of(InternalState.Name);
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

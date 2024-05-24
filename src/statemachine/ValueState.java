@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.ValueState.InternalState;
 import statemachine.model.IntegerValue;
 import statemachine.model.JavaValue;
@@ -42,7 +45,7 @@ public class ValueState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -50,8 +53,10 @@ public class ValueState extends TranspilerState<InternalState>
 			Optional<IntegerValue> oIValue = ((IntegerValueState)getTranspilerState(InternalState.IntegerValue)).getValue();
 			if(oIValue.isPresent())
 				value = Optional.of(oIValue.get());
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

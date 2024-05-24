@@ -2,7 +2,10 @@ package statemachine;
 
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.JavaFileState.InternalState;
 import statemachine.model.JavaClass;
 import statemachine.model.JavaImport;
@@ -49,24 +52,24 @@ public class JavaFileState extends TranspilerState<InternalState>
 	}
 	
 	@Override
-	public void onFinish(InternalState finished)
+	public Vector<InternalState> onFinish(InternalState finished)
 	{
 		switch(finished)
 		{
 		case PackageDecl:
 			packageName = ((PackageDeclState)getTranspilerState(InternalState.PackageDecl)).getPackageName();
-			this.addActive(InternalState.ImportList, InternalState.ClassDecl);
-			break;
+			return Vec.of(InternalState.ImportList, InternalState.ClassDecl);
 			
 		case ImportList:
 			imports = ((ImportListState)getTranspilerState(InternalState.ImportList)).getImports();
-			this.addActive(InternalState.ClassDecl);
-			break;
+			return Vec.of(InternalState.ClassDecl);
 			
 		case ClassDecl:
 			javaClass = ((ClassDeclState)getTranspilerState(InternalState.ClassDecl)).getJavaClass();
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 	
 	public Optional<String> getPackageName()

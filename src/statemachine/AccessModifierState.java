@@ -1,7 +1,9 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Vec;
 import statemachine.AccessModifierState.InternalState;
 import statemachine.model.AccessModifier;
 
@@ -45,7 +47,7 @@ public class AccessModifierState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -61,6 +63,7 @@ public class AccessModifierState extends TranspilerState<InternalState>
 			accessModifier = Optional.of(AccessModifier.PRIVATE);
 			break;
 		}
+		return Vec.empty();
 	}
 
 	@Override

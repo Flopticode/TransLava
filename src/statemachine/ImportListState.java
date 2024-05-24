@@ -2,7 +2,10 @@ package statemachine;
 
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.ImportListState.InternalState;
 import statemachine.model.JavaImport;
 
@@ -42,7 +45,7 @@ public class ImportListState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -51,9 +54,10 @@ public class ImportListState extends TranspilerState<InternalState>
 			if(oImport.isPresent())
 				imports.add(oImport.get());
 			getTranspilerState(InternalState.ImportDecl).resetStates();
-			this.addActive(InternalState.ImportDecl);
-			break;
+			return Vec.of(InternalState.ImportDecl);
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

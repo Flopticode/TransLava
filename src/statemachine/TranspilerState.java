@@ -18,7 +18,7 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 		this.internalStates = active[0].getDeclaringClass().getEnumConstants();
 		this.transpilerStateSupplier = transpilerStateSupplier;
 		this.defaultActive = active;
-		resetStates();
+		resetStates(false);
 	}
 	
 	protected TranspilerState<? extends Enum<?>> getTranspilerState(InternalState state)
@@ -26,45 +26,64 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 		return states.get(state);
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected void addActive(InternalState... states)
-	{	
-		for(InternalState is : states)
-		{
-			activeStates.add(is);
-		}
-	}
-	
-	public void evaluate(String token)
+	public boolean evaluate(String token)
 	{
+		boolean accepting = false;
+		
 		Vector<InternalState> remove = new Vector<>();
 		
-		int numActiveBefore = activeStates.size();
-		for(int i = 0; i < numActiveBefore; i++)
+		for(InternalState active : activeStates)
 		{
-			InternalState active = activeStates.get(i);
+			TranspilerState<? extends Enum<?>> activeSubState = getTranspilerState(active);
 			
-			TranspilerState<? extends Enum<?>> transpilerState = getTranspilerState(active);
-			
-			if(transpilerState.canConsume(token))
+			if(activeSubState.canConsume(token))
 			{
-				transpilerState.evaluate(token);
+				System.err.println("Eval " + active);
 				
-				if(transpilerState.isAccepting())
+				if(activeSubState.evaluate(token))
 				{
-					onFinish(active);
+					activeStates = onFinish(active);
+					if(activeSubState.consumesAny())
+						activeStates.add(active);
+					
+					if(((FinalStates)active).isFinal())
+						accepting = true;
+					
+					System.err.println("Resetting " + active + " (for second use)");
+					if(!activeSubState.consumesAny())
+						activeSubState.resetStates();
+					
+					
+					System.err.print("Set ");
+					for(InternalState na : activeStates)
+						System.err.print(na + ", ");
+					System.err.println("as branch");
+					
 				}
 			}
 			else
 			{
 				remove.add(active);
+				System.err.println("Removed " + active + " as branch. (won't consume " + token + ")");
 			}
 		}
 		
 		for(InternalState r : remove)
-		{
 			activeStates.remove(r);
+		
+		System.err.println("..");
+		
+		return accepting;
+	}
+	
+	protected boolean consumesAny()
+	{
+		for(InternalState na : activeStates)
+		{
+			if(getTranspilerState(na).consumesAny())
+				return true;
 		}
+		return false;
 	}
 	
 	public boolean canConsume(String token)
@@ -75,31 +94,12 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 				return true;
 		}
 		return false;
-	}
+	}	
 	
-	public boolean isAccepting(InternalState state)
-	{
-		return getTranspilerState(state).isAccepting();
-	}
-	
-	/**
-	 * A state is accepting if any final state is accepting
-	 */
-	public boolean isAccepting()
-	{
-		for(InternalState s : internalStates)
-		{
-			if(((FinalStates)s).isFinal() && getTranspilerState(s).isAccepting())
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	public abstract void onFinish(InternalState state);
+	public abstract Vector<InternalState> onFinish(InternalState state);
 	
 	@SuppressWarnings("unchecked")
-	protected void resetStates()
+	private void resetStates(boolean doReset)
 	{
 		if(internalStates.length > 0)
 		{
@@ -110,8 +110,19 @@ public abstract class TranspilerState<InternalState extends Enum<InternalState>>
 			for(int i = 0; i < internalStates.length; i++)
 				states.put(internalStates[i], transpilerStates[i]);
 			
-			this.addActive(defaultActive);
+			for(InternalState defaultState : defaultActive)
+			{
+				activeStates.add(defaultState);
+			}
+			
+			if(doReset)
+				reset();
 		}
+	}
+	
+	protected void resetStates()
+	{
+		resetStates(true);
 	}
 	protected abstract void reset();
 }

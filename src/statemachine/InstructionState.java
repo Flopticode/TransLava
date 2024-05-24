@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.InstructionState.InternalState;
 import statemachine.model.JavaAssignmentInstruction;
 import statemachine.model.JavaInstruction;
@@ -42,7 +45,7 @@ public class InstructionState extends TranspilerState<InternalState>
 	}
 	
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -50,8 +53,10 @@ public class InstructionState extends TranspilerState<InternalState>
 			Optional<JavaAssignmentInstruction> oAssIns = ((AssignmentInstructionState)getTranspilerState(InternalState.Assignment)).getInstruction();
 			if(oAssIns.isPresent())
 				instruction = Optional.of(oAssIns.get());
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

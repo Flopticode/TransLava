@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.PackageDeclState.InternalState;
 
 public class PackageDeclState extends TranspilerState<InternalState>
@@ -30,7 +33,7 @@ public class PackageDeclState extends TranspilerState<InternalState>
 		{
 			return new TranspilerState[] {
 				new PrimitiveState("package"),
-				new PrimitiveState(),
+				new IdentifierPrimitiveState(),
 				new PrimitiveState(";")
 			};
 		}
@@ -44,20 +47,20 @@ public class PackageDeclState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
 		case Package:
-			this.addActive(InternalState.Name);
-			break;
+			return Vec.of(InternalState.Name);
 		case Name:
 			this.packageName = ((PrimitiveState)getTranspilerState(InternalState.Name)).getInput();
-			this.addActive(InternalState.Semicolon);
-			break;
+			return Vec.of(InternalState.Semicolon);
 		case Semicolon:
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

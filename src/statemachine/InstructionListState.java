@@ -2,7 +2,10 @@ package statemachine;
 
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.InstructionListState.InternalState;
 import statemachine.model.JavaInstruction;
 
@@ -42,7 +45,7 @@ public class InstructionListState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
@@ -50,9 +53,10 @@ public class InstructionListState extends TranspilerState<InternalState>
 			Optional<JavaInstruction> oInstruction = ((InstructionState)getTranspilerState(InternalState.Instruction)).getInstruction();
 			if(oInstruction.isPresent())
 				instructions.add(oInstruction.get());
-			this.addActive(InternalState.Instruction);
-			break;
+			return Vec.of(InternalState.Instruction);
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

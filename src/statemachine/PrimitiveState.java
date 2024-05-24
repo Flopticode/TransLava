@@ -1,7 +1,9 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Vec;
 import statemachine.PrimitiveState.InternalState;
 
 public class PrimitiveState extends TranspilerState<InternalState>
@@ -39,6 +41,10 @@ public class PrimitiveState extends TranspilerState<InternalState>
 	{
 		this(Optional.empty());
 	}
+	public PrimitiveState(boolean expectAlphanumeric)
+	{
+		this(Optional.empty());
+	}
 	public PrimitiveState(String expectedInput)
 	{
 		this(Optional.of(expectedInput));
@@ -54,37 +60,39 @@ public class PrimitiveState extends TranspilerState<InternalState>
 	{
 		receivedInput = Optional.empty();
 	}
+	
+	@Override
+	protected boolean consumesAny()
+	{
+		return !receivedInput.isPresent();
+	}
 
 	@Override
 	public boolean canConsume(String token)
 	{
-		if(receivedInput.isPresent())
+		if(!consumesAny())
 			return false;
 		
 		if(expectedInput.isPresent())
 			return token.equals(expectedInput.get());
+			
 		return true;
 	}
 	
 	@Override
-	public void evaluate(String token)
+	public boolean evaluate(String token)
 	{
 		if(canConsume(token))
 		{
 			receivedInput = Optional.of(token);
 		}
-	}
-
-	@Override
-	public boolean isAccepting()
-	{
 		return receivedInput.isPresent();
 	}
 	
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
-		
+		return Vec.empty();
 	}
 	
 	@Override

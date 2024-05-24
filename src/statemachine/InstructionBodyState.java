@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.LinkedList;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.InstructionBodyState.InternalState;
 import statemachine.model.JavaInstruction;
 
@@ -46,19 +49,19 @@ public class InstructionBodyState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
 		case OpenCurlyBracket:
-			this.addActive(InternalState.InstructionList);
-			break;
+			return Vec.of(InternalState.InstructionList);
 		
 		case InstructionList:
 			instructionList = ((InstructionListState)getTranspilerState(InternalState.InstructionList)).getInstructionList();
-			this.addActive(InternalState.ClosedCurlyBracket);
-			break;
+			return Vec.of(InternalState.ClosedCurlyBracket);
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override

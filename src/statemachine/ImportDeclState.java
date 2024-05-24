@@ -1,7 +1,10 @@
 package statemachine;
 
 import java.util.Optional;
+import java.util.Vector;
 
+import helpers.Troublemaker;
+import helpers.Vec;
 import statemachine.ImportDeclState.InternalState;
 import statemachine.model.JavaImport;
 
@@ -45,22 +48,22 @@ public class ImportDeclState extends TranspilerState<InternalState>
 	}
 
 	@Override
-	public void onFinish(InternalState state)
+	public Vector<InternalState> onFinish(InternalState state)
 	{
 		switch(state)
 		{
 		case Import:
-			this.addActive(InternalState.PackageSig);
-			break;
+			return Vec.of(InternalState.PackageSig);
 			
 		case PackageSig:
 			packageSignature = ((PackageSigState)getTranspilerState(InternalState.PackageSig)).getPackageSignature();
-			this.addActive(InternalState.Semicolon);
-			break;
+			return Vec.of(InternalState.Semicolon);
 			
 		case Semicolon:
-			break;
+			return Vec.empty();
 		}
+		
+		throw Troublemaker.howdWeEndUpHere();
 	}
 
 	@Override
